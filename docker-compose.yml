@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:16
+    container_name: jobportal-db
+    environment:
+      POSTGRES_DB: jobportal
+      POSTGRES_USER: jobportal
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-changeme}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U jobportal"]
+      interval: 10s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: ../docker/Dockerfile.backend
+    container_name: jobportal-backend
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/jobportal
+      DB_USER: jobportal
+      DB_PASSWORD: ${DB_PASSWORD:-changeme}
+      JWT_SECRET: ${JWT_SECRET:-dGhpc2lzYXZlcnlzZWNyZXRqd3RrZXlmb3Jqb2Jwb3J0YWxhcHBsaWNhdGlvbjEyMzQ1Njc4OTA=}
+      FRONTEND_URL: http://localhost
+    ports:
+      - "8080:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: ../docker/Dockerfile.frontend
+      args:
+        VITE_API_BASE_URL: /api
+    container_name: jobportal-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+
+volumes:
+  pgdata:
