@@ -1,0 +1,47 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: job-portal-backend
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:h2:mem:jobportal;DB_CLOSE_DELAY=-1;MODE=PostgreSQL}
+    username: ${DB_USER:sa}
+    password: ${DB_PASSWORD:}
+    driver-class-name: ${DB_DRIVER:org.h2.Driver}
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.H2Dialect
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 5MB
+  flyway:
+    enabled: false
+
+app:
+  jwt:
+    # 256-bit Base64-encoded secret key
+    secret: ${JWT_SECRET:dGhpc2lzYXZlcnlzZWNyZXRqd3RrZXlmb3Jqb2Jwb3J0YWxhcHBsaWNhdGlvbjEyMzQ1Njc4OTA=}
+    access-expiry-minutes: 600
+    refresh-expiry-days: 7
+  cors:
+    allowed-origin: ${FRONTEND_URL:http://localhost:5173,http://localhost:5174,http://localhost:3000}
+  upload:
+    dir: ${UPLOAD_DIR:./uploads}
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
